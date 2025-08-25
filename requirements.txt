@@ -1,0 +1,12 @@
+# Core dependencies for NFL GPP Sim Optimizer
+numpy
+pandas
+nfl_data_py
+streamlit
+pyarrow
+python-slugify
+
+# Development and testing
+pytest
+flake8
+coverage
