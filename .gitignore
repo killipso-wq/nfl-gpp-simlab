@@ -142,3 +142,11 @@ Thumbs.db
 data/
 *.zip
 logs/
+
+# Test output directories
+test_results/
+config_test_results/
+env_test_results/
+*_test_results/
+sample_*.csv
+test_*.toml

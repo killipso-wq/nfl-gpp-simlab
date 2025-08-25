@@ -26,6 +26,12 @@ class SimulationConfig:
         base_seed: int = 42,
         n_jobs: Optional[int] = None,
         quantiles: Optional[List[float]] = None,
+        # Advanced statistics options
+        enable_advanced_metrics: bool = True,
+        enable_position_breakdown: bool = True,
+        enable_risk_metrics: bool = True,
+        enable_correlation_analysis: bool = False,
+        coverage_quantiles: Optional[List[tuple]] = None,
         **kwargs
     ):
         """Initialize simulation configuration.
@@ -35,6 +41,11 @@ class SimulationConfig:
             base_seed: Base random seed for reproducibility
             n_jobs: Number of parallel jobs (respects NFL_GPP_SIMLAB_N_JOBS env var)
             quantiles: List of quantiles to compute (0-1 range)
+            enable_advanced_metrics: Enable advanced statistical metrics
+            enable_position_breakdown: Enable position-specific diagnostics
+            enable_risk_metrics: Enable risk-adjusted player metrics
+            enable_correlation_analysis: Enable correlation structure analysis
+            coverage_quantiles: List of (lower, upper) quantile pairs for coverage analysis
             **kwargs: Additional configuration options
         """
         self.n_trials = n_trials
@@ -62,6 +73,22 @@ class SimulationConfig:
             if invalid_quantiles:
                 raise ValueError(f"Quantiles must be in [0, 1] range. Invalid: {invalid_quantiles}")
             self.quantiles = quantiles
+        
+        # Advanced statistics configuration
+        self.enable_advanced_metrics = enable_advanced_metrics
+        self.enable_position_breakdown = enable_position_breakdown
+        self.enable_risk_metrics = enable_risk_metrics
+        self.enable_correlation_analysis = enable_correlation_analysis
+        
+        # Default coverage quantiles for analysis
+        if coverage_quantiles is None:
+            self.coverage_quantiles = [(0.1, 0.9), (0.25, 0.75), (0.05, 0.95)]
+        else:
+            # Validate coverage quantiles
+            for lower, upper in coverage_quantiles:
+                if not (0 <= lower < upper <= 1):
+                    raise ValueError(f"Invalid coverage quantile pair: ({lower}, {upper})")
+            self.coverage_quantiles = coverage_quantiles
             
         # Store additional options
         self.additional_options = kwargs
@@ -103,6 +130,10 @@ class SimulationConfig:
                 "Supported formats: .toml, .yaml, .yml"
             )
         
+        # Handle nested configuration sections
+        advanced_config = config_data.pop("advanced", {})
+        config_data.update(advanced_config)
+        
         return cls(**config_data)
     
     @classmethod
@@ -128,6 +159,11 @@ class SimulationConfig:
             "base_seed": self.base_seed,
             "n_jobs": self.n_jobs,
             "quantiles": self.quantiles,
+            "enable_advanced_metrics": self.enable_advanced_metrics,
+            "enable_position_breakdown": self.enable_position_breakdown,
+            "enable_risk_metrics": self.enable_risk_metrics,
+            "enable_correlation_analysis": self.enable_correlation_analysis,
+            "coverage_quantiles": self.coverage_quantiles,
             **self.additional_options,
         }
     
@@ -135,5 +171,6 @@ class SimulationConfig:
         """String representation of configuration."""
         return (
             f"SimulationConfig(n_trials={self.n_trials}, base_seed={self.base_seed}, "
-            f"n_jobs={self.n_jobs}, quantiles={self.quantiles})"
+            f"n_jobs={self.n_jobs}, quantiles={self.quantiles}, "
+            f"advanced_metrics={self.enable_advanced_metrics})"
         )

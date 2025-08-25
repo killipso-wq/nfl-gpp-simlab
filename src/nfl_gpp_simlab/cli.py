@@ -118,7 +118,7 @@ def generate_sample_config(config_path: Path) -> None:
     config_content = """# NFL GPP SimLab Configuration File
 # This file configures simulation parameters for the Monte Carlo engine
 
-# Simulation parameters
+# Core simulation parameters
 n_trials = 10000        # Number of Monte Carlo trials
 base_seed = 42          # Random seed for reproducibility  
 n_jobs = 1              # Number of parallel jobs (or set NFL_GPP_SIMLAB_N_JOBS env var)
@@ -126,12 +126,22 @@ n_jobs = 1              # Number of parallel jobs (or set NFL_GPP_SIMLAB_N_JOBS 
 # Statistical quantiles to compute (0-1 range)
 quantiles = [0.1, 0.25, 0.5, 0.75, 0.9, 0.95]
 
-# Advanced options (optional)
-# These are placeholders for future functionality
+# Advanced statistics configuration
+enable_advanced_metrics = true      # Enable enhanced diagnostic metrics
+enable_position_breakdown = true    # Position-specific diagnostic breakdowns
+enable_risk_metrics = true         # Risk-adjusted player metrics
+enable_correlation_analysis = false # Correlation structure analysis (future)
+
+# Coverage analysis quantile pairs (lower, upper)
+# Format: [[lower1, upper1], [lower2, upper2], ...]
+coverage_quantiles = [[0.1, 0.9], [0.25, 0.75], [0.05, 0.95]]
+
+# Advanced options (optional/future functionality)
 [advanced]
-enable_boom_analysis = true
-enable_value_metrics = true
-coverage_threshold = 0.8
+boom_threshold = 0.90              # Percentile threshold for boom analysis
+value_threshold = 3.0              # Minimum value per $1k threshold
+min_ownership_for_dart = 10.0      # Maximum ownership % for dart flag
+confidence_level = 0.80            # Default confidence interval level
 """
     
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -140,6 +150,11 @@ coverage_threshold = 0.8
     
     print(f"Sample configuration generated: {config_path}")
     print("Edit the file to customize your simulation parameters.")
+    print("\nKey configuration options:")
+    print("  • enable_advanced_metrics: Adds MAPE, bias, R², volatility ratios")
+    print("  • enable_position_breakdown: Separate diagnostics by position (QB, RB, etc.)")
+    print("  • enable_risk_metrics: Risk-adjusted values, upside/downside ratios")
+    print("  • coverage_quantiles: Multiple confidence interval coverage analysis")
 
 
 def main() -> int:

@@ -101,6 +101,16 @@ The simulation generates several output files in your results directory:
 | `n_jobs` | Parallel processing jobs | 1 | 4 |
 | `quantiles` | Statistical quantiles to compute | [0.1, 0.25, 0.5, 0.75, 0.9, 0.95] | [0.1, 0.5, 0.9] |
 
+### Advanced Statistics (New!)
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `enable_advanced_metrics` | Enhanced diagnostics with MAPE, bias, R² | true |
+| `enable_position_breakdown` | Position-specific diagnostic breakdowns | true |
+| `enable_risk_metrics` | Risk-adjusted player metrics | true |
+| `enable_correlation_analysis` | Portfolio correlation analysis | false |
+| `coverage_quantiles` | Multiple confidence interval pairs | [[0.1, 0.9], [0.25, 0.75], [0.05, 0.95]] |
+
 ### Environment Variables
 
 - `NFL_GPP_SIMLAB_N_JOBS`: Set default number of parallel jobs
@@ -126,12 +136,31 @@ Side-by-side comparison with site projections:
 - `value_per_1k`: Value per $1k salary
 - `dart_flag`: High-upside, low-ownership flag
 
+**New Advanced Metrics:**
+- `volatility_80pct`: 80% confidence interval width (risk measure)
+- `risk_adjusted_value`: Sharpe-like ratio (return per unit risk)
+- `upside_downside_ratio`: Upside potential vs downside risk
+- `ownership_adjusted_value`: Contrarian value boost for low ownership
+- `points_per_dollar`: Raw salary efficiency
+- `risk_adj_points_per_dollar`: Risk-adjusted salary efficiency
+
 ### diagnostics_summary.csv
 Accuracy metrics for model validation:
 - `mae`: Mean absolute error vs site projections
 - `rmse`: Root mean squared error  
 - `correlation`: Correlation with site projections
 - `coverage_p10_p90`: % of site projections within your confidence intervals
+
+**New Advanced Diagnostics:**
+- `mean_absolute_percentage_error`: MAPE as percentage
+- `bias`: Systematic over/under-projection
+- `median_absolute_error`: Robust error metric
+- `r_squared`: Explained variance
+- `volatility_ratio`: Your volatility vs site volatility
+- `coverage_p25_p75`: Coverage for 50% confidence intervals
+- `coverage_p5_p95`: Coverage for 90% confidence intervals
+
+Position-specific breakdowns (QB, RB, WR, TE, K) are included when `enable_position_breakdown=true` and sufficient players per position are available.
 
 ## Configuration File Formats
 
@@ -143,8 +172,15 @@ base_seed = 999
 n_jobs = 4
 quantiles = [0.1, 0.5, 0.9]
 
+# Advanced statistics
+enable_advanced_metrics = true
+enable_position_breakdown = true
+enable_risk_metrics = true
+coverage_quantiles = [[0.1, 0.9], [0.25, 0.75]]
+
 [advanced]
-enable_boom_analysis = true
+boom_threshold = 0.90
+value_threshold = 3.0
 ```
 
 ### YAML (Optional)
