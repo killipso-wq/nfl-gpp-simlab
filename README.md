@@ -1,6 +1,73 @@
 # NFL GPP Sim Optimizer — Master Reference (Scope, Design, Commands, UI, Files)
 
 This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes the “adapter” CLI to generate simulator-ready inputs from nfl_data_py.
+## 🚀 Quick Start
+
+### One-Click Setup & Launch
+
+**Windows:**
+```cmd
+.\run.bat
+```
+
+**macOS/Linux:**
+```bash
+./run.sh
+```
+
+Both scripts will:
+- Create a Python virtual environment if needed
+- Install dependencies from `requirements.txt`
+- Launch the Streamlit UI at http://localhost:8501
+
+### Manual Setup
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch UI
+streamlit run app.py
+
+# Or use CLI
+python -m src.projections.run_week_from_site_players --season 2025 --week 1 --players-site ./players_sample.csv --sims 10000 --seed 1337 --out data/sim_week
+```
+
+### Docker
+
+```bash
+# Build and run
+docker build -t nfl-gpp-simlab .
+docker run -p 8501:8501 nfl-gpp-simlab
+
+# Access at http://localhost:8501
+```
+
+### Features
+
+- **📁 Upload players.csv** - Supports common column formats (PLAYER/name, POS/position, TEAM/tm, etc.)
+- **🔍 Column detection** - Auto-maps and validates your CSV format
+- **🚀 Monte Carlo simulation** - Generates projections with floor/ceiling estimates
+- **📊 Comparison analysis** - Site vs. sim projections with delta analysis
+- **📥 Multiple outputs** - CSV downloads + ZIP bundle with metadata
+- **🔒 Privacy-focused** - Telemetry disabled, data processed locally
+
+### Troubleshooting
+
+**Windows execution policy error:**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Port 8501 in use:**
+```bash
+streamlit run app.py --server.port 8502
+```
+
+**Permission denied on run.sh:**
+```bash
+chmod +x run.sh
+```
 
 Use this document to:
 - Verify scope and acceptance criteria
