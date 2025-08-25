@@ -1,0 +1,5 @@
+nfl_data_py
+pandas
+numpy
+pyarrow
+python-slugify
