@@ -1,7 +1,7 @@
 [Realistic NFL Monte Carlo Simulation.pdf](https://github.com/user-attachments/files/21975791/Realistic.NFL.Monte.Carlo.Simulation.pdf)
 # NFL GPP Sim Optimizer — Master Reference (Scope, Design, Commands, UI, Files)
 
-This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes the “adapter” CLI to generate simulator-ready inputs from nfl_data_py.
+This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes  to generate simulator-ready inputs from nfl_data_py.
 
 Use this document to:
 - Verify scope and acceptance criteria
@@ -52,7 +52,7 @@ Use this document to:
     - [ ] Sliders: ownership band, boom_score threshold, value_per_1k threshold
     - [ ] Button: “Apply preset” populates constraints, then “Optimize”
 
-- [ ] Adapter CLI (optional path)
+
   - [ ] src/ingest/nfl_data_py_to_simulator.py (players.csv + optional ownership.csv)
   - [ ] Ownership heuristic (projection/salary/total); normalize to 0–100%
   - [ ] Stable player_id (TEAM_POS_NORMALIZEDNAME) and game_id (AWAY@HOME)
@@ -83,7 +83,7 @@ Use this document to:
 - Compare our projections to the site projections from your 2025 players.csv (delta, coverage, accuracy).
 - Identify low-owned upside “darts” via a Boom score (1–100) and dart_flag.
 - Provide a robust Streamlit UI: upload players.csv, click run, analyze outputs, download all artifacts or a single ZIP.
-- Also offer a CLI adapter to produce players.csv (and optional ownership.csv) directly from nfl_data_py when you don’t have a site file.
+- Also offer a  produce players.csv (and optional ownership.csv) directly from nfl_data_py when you don’t have a site file.
 
 --------------------------------------------------------------------------------
 
@@ -270,7 +270,6 @@ Compare fields:
 
 --------------------------------------------------------------------------------
 
-9) CLI tools and example commands
 
 Dependencies:
 - pip install nfl_data_py pandas numpy pyarrow python-slugify
@@ -342,7 +341,6 @@ Tabs:
 - simulator.py — Monte Carlo engine glue for Streamlit
 - src/
   - ingest/
-    - nfl_data_py_to_simulator.py — adapter CLI (players.csv + optional ownership.csv)
     - site_players.py — loader for your site file schema (PLAYER, POS, TEAM, OPP, O/U, SPRD, SAL, FPTS, VAL, RST%)
     - name_normalizer.py — normalize names; build player_id
     - scoring.py — DK scoring function for game logs
@@ -350,7 +348,6 @@ Tabs:
     - sources.py, prep.py, team_metrics.py, player_metrics.py, pipeline.py — metrics warehouse for 2023–2024
   - projections/
     - prior_builder.py — build team/player priors
-    - run_week_from_site_players.py — main CLI for 2025 sim using your players.csv
     - value_metrics.py — value per $1k, ceiling value, deltas vs site
     - boom_score.py — boom_prob, boom_score (1–100), dart_flag
     - diagnostics.py — MAE/RMSE/corr/coverage, flags
@@ -460,7 +457,7 @@ Adapter (optional):
   - Caching works; Clear cache button
   - Previews with filters/sorts
   - 4 CSV download buttons + “Download all (zip)” including metadata.json
-- Adapter CLI:
+
   - Generates players.csv and (optionally) ownership.csv from nfl_data_py, using schedule and 2023–2024 baseline
   - Stable player_id format and game_id mapping
 - Optimizer (planned next):
