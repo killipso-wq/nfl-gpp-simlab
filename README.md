@@ -284,6 +284,12 @@ Dependencies:
 - Command:
   - python scripts/build_boom_thresholds.py --start 2023 --end 2024 --out data/baseline/boom_thresholds.json --quantile 0.90
 
+9.2.1) Automated baseline refresh (NEW - This PR)
+- Purpose: Keep baseline data current with weekly GitHub Action
+- Manual trigger: GitHub → Actions → "Refresh Baseline Data" → Run workflow
+- Automatic: Runs every Sunday at 10 AM UTC
+- Output: Creates PR with updated data/baseline/ files if changes detected
+
 9.3) Run a 2025 week from your site players.csv
 - Purpose: full simulator run using your roster/OU/SPRD/SAL/RST%
 - Command:
@@ -323,6 +329,30 @@ Tabs:
   - Previews: sim_players and compare with filters (by position) and sorting (delta_mean/sim_std/sim_mean)
   - Downloads: four CSV buttons + “Download all (zip)” including metadata.json
   - Metrics surfaced: value_per_1k, ceil_per_1k, boom_prob, beat_site_prob, boom_score, dart_flag; SAL/RST%/site_val shown if provided
+
+- **Optimizer** (NEW - This PR)
+  - **Build from nfl_data_py section:**
+    - Inputs: Season (default 2025), Week (1–22), Site (DraftKings/FanDuel), Slate (Main), RNG Seed
+    - Flow: Fetch player-level data via nfl_data_py; compute baseline projections using weighted recent performance
+    - Optional salary upload: Merge user-provided CSV with player names and salaries
+    - Default salaries: Position-based placeholder salaries with clear warning when no upload provided
+    - Output: Normalized players.csv compatible with simulator schema (name, team, opp, pos, salary, fpts, own%)
+    - Save location: `data/generated/{season}_w{week}/players.csv` with preview and download
+    - "Send to Optimizer" button loads generated pool into lineup builder
+    
+  - **GPP Presets + Lineup Builder section:**
+    - Presets: Solo Entry (conservative), 20-max (balanced), 150-max (aggressive)
+    - Each preset configures: lineup count, randomness, max total ownership, exposure caps, stacking rules, salary constraints
+    - Constraints UI:
+      - Lineup configuration: Number of lineups, salary cap/min, roster template (site-specific)
+      - Stacking rules: QB stack min/max (1-3), bring-back count (0-2), max players per team
+      - Ownership limits: Per-lineup max total ownership %, per-player max exposure %
+      - Randomness: Projection variance for lineup diversity, min unique players vs previous lineups
+    - Optimizer engine: PuLP MILP solver maximizing projected points subject to constraints
+    - Multi-lineup generation: Sequential solve with diversity constraints and randomized projections
+    - Outputs: Lineup table with projections/salary/ownership/stacks; downloadable as CSV, JSON metadata, DraftKings upload format
+    - Save location: `data/lineups/{season}_w{week}_TIMESTAMP/` with lineups.csv and metadata.json
+    - Error handling: Clear validation for incomplete player pools and infeasible constraint combinations
   - Methodology link: points to docs/research/monte_carlo_football.pdf (see Section 19)
 
 - Optimizer
@@ -356,9 +386,11 @@ Tabs:
   - sim/
     - game_simulator.py — core Monte Carlo, environment/usage/efficiency/correlation sampling
 - scripts/
-  - build_baseline.py — create priors from 2023–2024
+  - build_baseline.py — create priors from 2023–2024 (UPDATED - This PR)
   - generate_metrics.py — build team/player/game metrics from nfl_data_py
   - build_boom_thresholds.py — compute boom cutoffs from 2023–2024
+- .github/workflows/
+  - baseline.yml — NEW: automated baseline data refresh (weekly schedule + manual trigger)
 - docs/
   - master_reference.md — this file
   - nfl_data_py_integration.md — adapter usage
@@ -376,12 +408,13 @@ Tabs:
 12) Requirements and environment
 
 - Python 3.10+
-- pip install -r requirements.txt (will include: nfl_data_py, pandas, numpy, pyarrow, python-slugify, streamlit)
+- pip install -r requirements.txt (UPDATED - includes: nfl_data_py, pandas, numpy, pyarrow, python-slugify, streamlit, pulp)
 - Optional: virtualenv (.venv) for local runs
 - Render deployment:
   - Service connected to GitHub repository
   - Start command: streamlit run app.py (or python -m streamlit run app.py)
   - Environment: STREAMLIT_SERVER_MAX_UPLOAD_SIZE=300 (optional, for larger uploads)
+  - **Disk attachment recommended**: For persistent data/lineups/ and data/generated/ output storage
   - Manual Deploy → Clear build cache & deploy after merges
 
 --------------------------------------------------------------------------------
