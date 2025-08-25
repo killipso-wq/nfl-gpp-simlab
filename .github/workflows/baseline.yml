@@ -1,0 +1,104 @@
+name: Refresh Baseline Data
+
+on:
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      start_year:
+        description: 'Start year for data'
+        required: false
+        default: '2023'
+      end_year:
+        description: 'End year for data'
+        required: false
+        default: '2024'
+      
+  # Scheduled run (every Sunday at 10 AM UTC)
+  schedule:
+    - cron: '0 10 * * 0'
+
+jobs:
+  refresh-baseline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Add git dependency for metadata
+        pip install GitPython
+        
+    - name: Create data directory
+      run: |
+        mkdir -p data/baseline
+        
+    - name: Run baseline builder
+      run: |
+        python scripts/build_baseline.py \
+          --start ${{ github.event.inputs.start_year || '2023' }} \
+          --end ${{ github.event.inputs.end_year || '2024' }} \
+          --out data \
+          --quantile 0.90
+      env:
+        # Suppress pandas warnings in CI
+        PYTHONWARNINGS: ignore
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        git diff --quiet data/baseline/ || echo "changes=true" >> $GITHUB_OUTPUT
+        
+    - name: Create Pull Request
+      if: steps.changes.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: refresh baseline data'
+        title: 'chore: refresh baseline data'
+        body: |
+          ## Automated Baseline Data Update
+          
+          This PR contains updated baseline data from nfl_data_py for seasons ${{ github.event.inputs.start_year || '2023' }}-${{ github.event.inputs.end_year || '2024' }}.
+          
+          ### Files Updated
+          - `data/baseline/team_priors.csv` - Team statistical averages
+          - `data/baseline/player_priors.csv` - Player career statistics  
+          - `data/baseline/boom_thresholds.json` - Position boom thresholds
+          - `data/baseline/position_baselines.csv` - Position fallback statistics
+          - `data/baseline/metadata.json` - Build metadata
+          
+          ### Trigger
+          ${{ github.event_name == 'workflow_dispatch' && 'Manual workflow dispatch' || 'Scheduled weekly update' }}
+          
+          ### Next Steps
+          1. Review the changes to ensure data quality
+          2. Merge if the data looks reasonable
+          3. Deploy to update the live application
+          
+          **Note:** This data is used by the Simulator and Optimizer for baseline projections when no site data is available.
+        branch: bot/baseline-update
+        branch-suffix: timestamp
+        delete-branch: true
+        
+    - name: No changes detected
+      if: steps.changes.outputs.changes != 'true'
+      run: |
+        echo "✅ No changes detected in baseline data"
+        echo "The current baseline data is up to date"
