@@ -1,0 +1,28 @@
+name: Link Check (internal)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "17 3 * * 1" # Mondays at 03:17 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    name: Check internal links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lychee link check (offline)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Offline mode checks only local/relative links to avoid external flaky failures
+          args: --offline --verbose --no-progress --base . "./README.md" "./docs/**/*.md"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
