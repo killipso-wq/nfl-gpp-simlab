@@ -1,4 +1,120 @@
-# NFL GPP Sim Optimizer — Master Reference (Scope, Design, Commands, UI, Files)
+# NFL GPP Sim Lab 🏈
+
+A Monte Carlo NFL DFS simulator with a robust Streamlit UI for analyzing player projections and generating optimized lineups.
+
+## Quick Start
+
+### Option 1: One-Click Run (Recommended)
+
+**Windows:**
+```cmd
+.\run.bat
+```
+
+**macOS/Linux:**
+```bash
+./run.sh
+```
+
+This will automatically:
+- Create a virtual environment (`.venv`)
+- Install all dependencies
+- Launch the Streamlit app at http://localhost:8501
+
+### Option 2: Manual Setup
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate it
+source .venv/bin/activate  # macOS/Linux
+# OR
+.venv\Scripts\activate.bat  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
+streamlit run streamlit_app.py
+```
+
+### Option 3: Docker
+
+```bash
+# Build the image
+docker build -t nfl-gpp-simlab .
+
+# Run the container
+docker run --rm -p 8501:8501 nfl-gpp-simlab
+```
+
+Then open http://localhost:8501 in your browser.
+
+## Usage
+
+### Streamlit UI
+1. **Upload & Validate**: Upload your players.csv file or use the sample data
+2. **Simulate & Download**: Configure settings (Season, Week, Sims, Seed) and run simulation
+3. **Download Results**: Get individual CSV files or complete ZIP package
+
+### CLI (Headless)
+```bash
+python -m src.projections.run_week_from_site_players \
+  --season 2025 \
+  --week 1 \
+  --players-site players_sample.csv \
+  --sims 10000 \
+  --seed 1337 \
+  --out data/sim_week
+```
+
+## Expected CSV Format
+
+Your players.csv should include these columns (column name variations are automatically mapped):
+
+**Required:**
+- `PLAYER` (name, player, player_name)
+- `POS` (position, pos) 
+- `TEAM` (tm, team)
+- `SAL` (salary, sal, dk_salary)
+- `FPTS` (proj, projection, fpts, projected_points)
+
+**Optional:**
+- `OPP` (opponent, opp)
+- `RST%` (own, ownership, own%, rst) - ownership percentage
+- `VAL` (value, val, value_per_1k) - value metrics
+
+## Output Files
+
+Each simulation run creates a timestamped directory under `data/sim_week/` with:
+
+- **sim_players.csv** - Simulated projections with floor/ceiling/boom metrics
+- **compare.csv** - Comparison between your projections and simulated results  
+- **diagnostics_summary.csv** - Statistical summary (MAE, RMSE, correlation)
+- **flags.csv** - Outliers and data quality issues
+- **metadata.json** - Run configuration and settings
+- **simulator_outputs.zip** - Complete package of all files
+
+## Troubleshooting
+
+**Windows PowerShell Execution Policy:**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Port 8501 already in use:**
+```bash
+streamlit run streamlit_app.py --server.port 8502
+```
+
+**Streamlit not found after installation:**
+- Ensure virtual environment is activated
+- Try `python -m streamlit run streamlit_app.py`
+
+---
+
+## NFL GPP Sim Optimizer — Master Reference (Scope, Design, Commands, UI, Files)
 
 This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes the “adapter” CLI to generate simulator-ready inputs from nfl_data_py.
 
