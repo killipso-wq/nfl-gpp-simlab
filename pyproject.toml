@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nfl-gpp-simlab"
+version = "0.1.0"
+description = "NFL GPP simulation lab"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "NFL GPP SimLab" }]
+license = { text = "MIT" }
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "pydantic>=2",
+  "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff>=0.5",
+  "mypy",
+  "black",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ISC", "PIE", "SIM", "TID", "C4"]
+ignore = []
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+ignore_missing_imports = true
