@@ -3,6 +3,76 @@
 
 This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes  to generate simulator-ready inputs from nfl_data_py.
 
+## Quick Start
+
+### Installation and Setup
+
+```bash
+# Install the package
+pip install -e .
+
+# Install development dependencies (includes pre-commit, ruff, mypy, pytest)
+pip install -e .[dev]
+
+# Install UI dependencies (for progress bars)
+pip install -e .[ui]
+
+# Set up pre-commit hooks (recommended for developers)
+pip install pre-commit && pre-commit install
+```
+
+### Basic Usage
+
+```python
+from nfl_gpp_simlab import MonteCarloConfig, MonteCarloSimulator, summarize
+
+# Configure simulation
+config = MonteCarloConfig(
+    n_trials=10000,
+    seed=42,
+    show_progress=True,  # Enable progress bar (requires tqdm)
+    quantiles=[0.1, 0.25, 0.75, 0.9]  # Custom quantiles
+)
+
+# Run simulation
+simulator = MonteCarloSimulator(config)
+base_projections = {
+    "Josh Allen": 24.5,
+    "Stefon Diggs": 16.2,
+    "Derrick Henry": 18.8
+}
+results = simulator.simulate(base_projections)
+
+# Analyze results
+for player, outcomes in results.items():
+    stats = summarize(outcomes, config.quantiles)
+    print(f"{player}: Mean={stats['mean']:.2f}, Median={stats['median']:.2f}")
+```
+
+### Run Examples
+
+```bash
+# Run the quickstart example
+python examples/quickstart.py
+```
+
+### Development Workflow
+
+```bash
+# Run linting and formatting
+ruff check --fix src/ tests/ examples/
+ruff format src/ tests/ examples/
+
+# Run type checking
+mypy --strict src/
+
+# Run tests with coverage
+pytest --cov=src --cov-report=term-missing
+
+# Run all pre-commit hooks
+pre-commit run --all-files
+```
+
 Use this document to:
 - Verify scope and acceptance criteria
 - Find exact commands and where outputs go
