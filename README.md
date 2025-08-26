@@ -1,6 +1,13 @@
 [Realistic NFL Monte Carlo Simulation.pdf](https://github.com/user-attachments/files/21975791/Realistic.NFL.Monte.Carlo.Simulation.pdf)
 # NFL GPP Sim Optimizer — Master Reference (Scope, Design, Commands, UI, Files)
 
+## Quick Links
+
+📋 **[Master Reference](docs/master_reference.md)** - Complete scope, design, commands, UI, and file specifications  
+📊 **[Methodology (Monte Carlo PDF)](docs/research/monte_carlo_football.pdf)** - Authoritative Monte Carlo simulation methodology  
+
+---
+
 This is the single source of truth for what we are building: end-to-end baseline (2023–2024) from nfl_data_py, a Monte Carlo simulator for the 2025 slate driven by your players.csv, robust outputs (value/boom/diagnostics), and a Streamlit UI. It also includes  to generate simulator-ready inputs from nfl_data_py.
 
 Use this document to:
