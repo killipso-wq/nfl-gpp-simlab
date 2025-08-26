@@ -138,7 +138,9 @@ Thumbs.db
 # Streamlit
 .streamlit/
 
-# Project data/artifacts
-data/
+# Project data/artifacts  
+data/*
+!data/site/
+!data/site/*.csv
 *.zip
 logs/
