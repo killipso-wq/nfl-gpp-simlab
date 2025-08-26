@@ -15,7 +15,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 try:
     import pandas as pd
     import numpy as np
-    import nfl_data_py as nfl
+    try:
+        import nfl_data_py as nfl
+        NFL_DATA_AVAILABLE = True
+    except ImportError:
+        NFL_DATA_AVAILABLE = False
+        print("Warning: nfl_data_py not available, will use fallback mock data for testing")
 except ImportError as e:
     print(f"Error: Required packages not available: {e}")
     print("Please install requirements: pip install -r requirements.txt")
@@ -28,9 +33,24 @@ def load_weekly_data(start_year, end_year):
     """Load weekly data for skill positions from nfl_data_py."""
     print(f"Loading weekly data for seasons {start_year}-{end_year}...")
     
-    # Load weekly data for the specified seasons
-    seasons = list(range(start_year, end_year + 1))
-    weekly_data = nfl.import_weekly_data(seasons)
+    if not NFL_DATA_AVAILABLE:
+        # Fallback to mock data for testing
+        print("Using mock data (nfl_data_py not available)")
+        mock_file = Path("test_data/mock_weekly_data.csv")
+        if not mock_file.exists():
+            raise FileNotFoundError(f"nfl_data_py not available and mock data file not found: {mock_file}")
+        
+        weekly_data = pd.read_csv(mock_file)
+        
+        # Filter to specified seasons
+        weekly_data = weekly_data[
+            (weekly_data['season'] >= start_year) & 
+            (weekly_data['season'] <= end_year)
+        ]
+    else:
+        # Load weekly data for the specified seasons
+        seasons = list(range(start_year, end_year + 1))
+        weekly_data = nfl.import_weekly_data(seasons)
     
     # Filter to skill positions only (QB, RB, WR, TE)
     skill_positions = ['QB', 'RB', 'WR', 'TE']
